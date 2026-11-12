@@ -1,0 +1,444 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Upload MRI Scan — Brain Tumor Classification</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Upload an MRI scan image for brain tumor classification using deep learning CNN model">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: #0a0e1a;
+            color: #f1f5f9;
+            display: flex;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px;
+            min-height: 100vh;
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid rgba(56, 189, 248, 0.08);
+            display: flex;
+            flex-direction: column;
+            padding: 32px 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .brand-icon svg { width: 20px; height: 20px; color: #fff; }
+        .brand-text h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #f1f5f9;
+            line-height: 1.3;
+        }
+        .brand-text p {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .sidebar-nav li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .sidebar-nav li a:hover,
+        .sidebar-nav li a.active {
+            background: rgba(56, 189, 248, 0.08);
+            color: #38bdf8;
+        }
+        .sidebar-nav li a svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+        .sidebar-info {
+            margin-top: auto;
+            padding: 16px;
+            background: rgba(56, 189, 248, 0.06);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
+        }
+        .sidebar-info h4 {
+            font-size: 12px;
+            font-weight: 600;
+            color: #38bdf8;
+            margin-bottom: 6px;
+        }
+        .sidebar-info p {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* ── Main content ── */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(56, 189, 248, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.04) 0%, transparent 60%),
+                #0a0e1a;
+            padding: 40px;
+        }
+
+        /* ── Upload card ── */
+        .upload-card {
+            width: 100%;
+            max-width: 560px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 20px;
+            padding: 40px 36px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: card-in 0.7s cubic-bezier(.22,1,.36,1) forwards;
+            opacity: 0;
+            transform: translateY(24px);
+        }
+        @keyframes card-in {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .upload-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .upload-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .upload-header p {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        /* ── Drop zone ── */
+        .drop-zone {
+            border: 2px dashed rgba(56, 189, 248, 0.2);
+            border-radius: 16px;
+            padding: 44px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(56, 189, 248, 0.02);
+            position: relative;
+        }
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: rgba(56, 189, 248, 0.5);
+            background: rgba(56, 189, 248, 0.06);
+        }
+        .drop-zone-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(56,189,248,0.12), rgba(139,92,246,0.12));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+        .drop-zone-icon svg { width: 28px; height: 28px; color: #38bdf8; }
+        .drop-zone h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 6px;
+        }
+        .drop-zone p {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .drop-zone p span {
+            color: #38bdf8;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        .drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* ── Image preview ── */
+        .preview-container {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .preview-container.show { display: block; }
+        .preview-wrapper {
+            position: relative;
+            display: inline-block;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 2px solid rgba(56, 189, 248, 0.15);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+        .preview-wrapper img {
+            display: block;
+            max-width: 280px;
+            max-height: 220px;
+            object-fit: cover;
+        }
+        .preview-filename {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        .preview-filename svg {
+            width: 14px;
+            height: 14px;
+            vertical-align: -2px;
+            margin-right: 4px;
+            color: #10b981;
+        }
+
+        /* ── Algorithm selector ── */
+        .algo-group {
+            margin-top: 24px;
+        }
+        .algo-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+        .algo-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 10px;
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            transition: all 0.3s;
+        }
+        .algo-group select:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+
+        /* ── Submit button ── */
+        .btn-analyze {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.25);
+            transition: all 0.3s ease;
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.3px;
+        }
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(56, 189, 248, 0.35);
+        }
+        .btn-analyze:active { transform: translateY(0); }
+        .btn-analyze svg { width: 18px; height: 18px; }
+        .btn-analyze::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%);
+            transform: translateX(-100%);
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 24px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714a2.25 2.25 0 0 0 .659 1.591L19 14.5m-4.25-5.682c.25.023.5.05.75.082M5 14.5l-1.456 1.456a2.25 2.25 0 0 0-.659 1.591V19a2.25 2.25 0 0 0 2.25 2.25h13.73a2.25 2.25 0 0 0 2.25-2.25v-1.453a2.25 2.25 0 0 0-.659-1.591L19 14.5m-14 0h14"/>
+            </svg>
+        </div>
+        <div class="brand-text">
+            <h3>Brain Tumor CNN</h3>
+            <p>Deep Learning Classifier</p>
+        </div>
+    </div>
+
+    <ul class="sidebar-nav">
+        <li>
+            <a href="/">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955a1.126 1.126 0 0 1 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+                Home
+            </a>
+        </li>
+        <li>
+            <a href="#" class="active">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+                Upload Scan
+            </a>
+        </li>
+    </ul>
+
+    <div class="sidebar-info">
+        <h4>Supported Classes</h4>
+        <p>Glioma Tumor · Meningioma Tumor · Pituitary Tumor · No Tumor</p>
+    </div>
+</aside>
+
+<!-- Main content -->
+<main class="main-content">
+    <div class="upload-card">
+        <div class="upload-header">
+            <h2>Upload MRI Scan</h2>
+            <p>Select or drag an MRI brain scan image for classification</p>
+        </div>
+
+        <form action="output" method="POST" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+
+            <!-- Drop zone -->
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z"/>
+                    </svg>
+                </div>
+                <h3>Drag & Drop MRI Image</h3>
+                <p>or <span>browse files</span> from your computer</p>
+                <p style="margin-top:8px;font-size:11px;color:#475569;">PNG, JPG, JPEG up to 10MB</p>
+                <input type="file" name="file" id="fileInput" accept="image/*" required>
+            </div>
+
+            <!-- Image preview -->
+            <div class="preview-container" id="previewContainer">
+                <div class="preview-wrapper">
+                    <img id="previewImg" src="#" alt="MRI Preview">
+                </div>
+                <p class="preview-filename">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                    <span id="fileName">No file selected</span>
+                </p>
+            </div>
+
+            <!-- Algorithm selector -->
+            <div class="algo-group">
+                <label for="algo-select">Classification Model</label>
+                <select id="algo-select" name="algo">
+                    <option value="model">CNN Deep Learning Model</option>
+                </select>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-analyze" id="analyzeBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                Analyze Scan
+            </button>
+        </form>
+    </div>
+</main>
+
+<script>
+    // Drag-and-drop + preview
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewImg = document.getElementById('previewImg');
+    const fileName = document.getElementById('fileName');
+
+    ['dragenter', 'dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+        dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('drag-over'); });
+    });
+    dropZone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        if (files.length) { fileInput.files = files; showPreview(files[0]); }
+    });
+    fileInput.addEventListener('change', e => {
+        if (e.target.files.length) showPreview(e.target.files[0]);
+    });
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            previewImg.src = e.target.result;
+            fileName.textContent = file.name;
+            previewContainer.classList.add('show');
+        };
+        reader.readAsDataURL(file);
+    }
+</script>
+
+</body>
+</html>

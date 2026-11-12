@@ -1,0 +1,310 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Brain Tumor Classification — Login</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Advancements in Deep Learning Techniques for Brain Tumor Classification from MRI Scans">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0e1a 0%, #0d1b2a 30%, #1b2838 60%, #0a0e1a 100%);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ── Animated background particles ── */
+        .bg-particles {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .bg-particles span {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(56, 189, 248, 0.35);
+            border-radius: 50%;
+            animation: float-up linear infinite;
+            box-shadow: 0 0 6px rgba(56, 189, 248, 0.3);
+        }
+        @keyframes float-up {
+            0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+        .bg-particles span:nth-child(1)  { left: 5%;  width: 3px; height: 3px; animation-duration: 8s;  animation-delay: 0s; }
+        .bg-particles span:nth-child(2)  { left: 15%; width: 5px; height: 5px; animation-duration: 12s; animation-delay: 1s; }
+        .bg-particles span:nth-child(3)  { left: 25%; width: 2px; height: 2px; animation-duration: 10s; animation-delay: 2s; }
+        .bg-particles span:nth-child(4)  { left: 35%; width: 4px; height: 4px; animation-duration: 14s; animation-delay: 0.5s; }
+        .bg-particles span:nth-child(5)  { left: 45%; width: 6px; height: 6px; animation-duration: 9s;  animation-delay: 3s; background: rgba(139, 92, 246, 0.3); box-shadow: 0 0 6px rgba(139,92,246,0.3); }
+        .bg-particles span:nth-child(6)  { left: 55%; width: 3px; height: 3px; animation-duration: 11s; animation-delay: 1.5s; }
+        .bg-particles span:nth-child(7)  { left: 65%; width: 5px; height: 5px; animation-duration: 13s; animation-delay: 2.5s; background: rgba(139, 92, 246, 0.3); box-shadow: 0 0 6px rgba(139,92,246,0.3); }
+        .bg-particles span:nth-child(8)  { left: 75%; width: 2px; height: 2px; animation-duration: 7s;  animation-delay: 0.8s; }
+        .bg-particles span:nth-child(9)  { left: 85%; width: 4px; height: 4px; animation-duration: 10s; animation-delay: 3.5s; }
+        .bg-particles span:nth-child(10) { left: 95%; width: 3px; height: 3px; animation-duration: 15s; animation-delay: 1.2s; background: rgba(16, 185, 129, 0.3); box-shadow: 0 0 6px rgba(16,185,129,0.3); }
+
+        /* ── Hero text above card ── */
+        .hero-section {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #38bdf8;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .hero-badge svg { width: 14px; height: 14px; }
+        .hero-title {
+            font-size: clamp(22px, 3.5vw, 32px);
+            font-weight: 800;
+            color: #f1f5f9;
+            text-align: center;
+            line-height: 1.25;
+            max-width: 500px;
+        }
+        .hero-title span {
+            background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            text-align: center;
+            max-width: 400px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        /* ── Glassmorphic login card ── */
+        .login-card {
+            width: 380px;
+            max-width: 90vw;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(56, 189, 248, 0.12);
+            border-radius: 20px;
+            padding: 36px 32px 32px;
+            box-shadow:
+                0 0 60px rgba(56, 189, 248, 0.06),
+                0 25px 50px rgba(0, 0, 0, 0.4);
+            animation: card-enter 0.8s cubic-bezier(.22,1,.36,1) forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        @keyframes card-enter {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(139,92,246,0.15));
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+        }
+        .card-icon svg { width: 24px; height: 24px; color: #38bdf8; }
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .card-desc {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* ── Form elements ── */
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 10px;
+            color: #f1f5f9;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .form-group input::placeholder {
+            color: #475569;
+        }
+        .form-group input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+            background: rgba(15, 23, 42, 0.7);
+        }
+
+        /* ── Login button ── */
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.25);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 6px;
+            letter-spacing: 0.5px;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(56, 189, 248, 0.35);
+        }
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        .btn-login::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+            transform: translateX(-100%);
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        /* ── Error message styling ── */
+        .error-msg {
+            display: none;
+            text-align: center;
+            font-size: 13px;
+            color: #f87171;
+            margin-top: 12px;
+        }
+
+        /* ── Footer ── */
+        .card-footer {
+            text-align: center;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(148, 163, 184, 0.08);
+        }
+        .card-footer p {
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.5;
+        }
+        .card-footer p strong {
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Background particles -->
+<div class="bg-particles">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="hero-section">
+    <div class="hero-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714a2.25 2.25 0 0 0 .659 1.591L19 14.5m-4.25-5.682c.25.023.5.05.75.082M5 14.5l-1.456 1.456a2.25 2.25 0 0 0-.659 1.591V19a2.25 2.25 0 0 0 2.25 2.25h13.73a2.25 2.25 0 0 0 2.25-2.25v-1.453a2.25 2.25 0 0 0-.659-1.591L19 14.5m-14 0h14" />
+        </svg>
+        CNN · Deep Learning
+    </div>
+
+    <h1 class="hero-title">
+        <span>Brain Tumor</span> Classification<br>from MRI Scans
+    </h1>
+    <p class="hero-subtitle">
+        Powered by advanced deep learning techniques for accurate multi-class tumor detection and classification.
+    </p>
+
+    <!-- Login Card -->
+    <div class="login-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+            </div>
+            <h2 class="card-title">Sign In</h2>
+            <p class="card-desc">Access the diagnostic dashboard</p>
+        </div>
+
+        <form action="input" method="POST" enctype="multipart/form-data" id="loginForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="username-field">Username</label>
+                <input id="username-field" type="text" name="name" placeholder="Enter your username" required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="password-field">Password</label>
+                <input id="password-field" type="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn-login" id="login-btn">
+                Sign In →
+            </button>
+
+            <p class="error-msg" id="error-msg">Invalid credentials. Please try again.</p>
+        </form>
+
+        <div class="card-footer">
+            <p><strong>Research Project</strong><br>Advancements in Deep Learning Techniques<br>for Brain Tumor Classification</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
